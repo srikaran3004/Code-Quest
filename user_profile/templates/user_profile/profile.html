@@ -1,0 +1,115 @@
+{% extends 'custom_auth/base.html' %}
+
+{% block title %}Your Profile - CodeQuest{% endblock %}
+
+{% block content %}
+    <div class="max-w-6xl mx-auto">
+        <!-- Profile Header -->
+        <div class="card-glass p-8 rounded-lg shadow-lg mb-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mr-6">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">{{ user.username }}</h1>
+                        <p class="text-gray-600">CodeQuest Member since {{ user.date_joined|date:"F Y" }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'custom_auth:edit_password' %}" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-lg hover:from-blue-600 hover:to-teal-600 transition duration-300">
+                        🔒 Edit Password
+                    </a>
+                    <a href="/" class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg hover:from-gray-600 hover:to-gray-700 transition duration-300">
+                        ← Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="card-glass p-6 rounded-lg text-center">
+                <div class="text-3xl font-bold text-green-600 mb-2">{{ solved_problems_count }}</div>
+                <div class="text-gray-600 font-medium">Problems Solved</div>
+            </div>
+            <div class="card-glass p-6 rounded-lg text-center">
+                <div class="text-3xl font-bold text-blue-600 mb-2">{{ submissions_count }}</div>
+                <div class="text-gray-600 font-medium">Total Submissions</div>
+            </div>
+            <div class="card-glass p-6 rounded-lg text-center">
+                <div class="text-3xl font-bold text-purple-600 mb-2">{{ skilled_topics|length }}</div>
+                <div class="text-gray-600 font-medium">Topics Mastered</div>
+            </div>
+            <div class="card-glass p-6 rounded-lg text-center">
+                <div class="text-3xl font-bold text-orange-600 mb-2">
+                    {% if submissions_count > 0 %}
+                        {% widthratio solved_problems_count submissions_count 100 %}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+                <div class="text-gray-600 font-medium">Success Rate</div>
+            </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="card-glass p-6 rounded-lg mb-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                🎯 Topics Most Skilled In
+            </h3>
+            {% if skilled_topics %}
+                <div class="flex flex-wrap gap-3">
+                    {% for tag in skilled_topics %}
+                        <a href="{% url 'Quest:problems_by_tag' tag.id %}">
+                            <span class="bg-gradient-to-r from-blue-100 to-teal-100 text-blue-800 hover:from-blue-200 hover:to-teal-200 text-sm font-medium px-4 py-2 rounded-full transition duration-300 transform hover:scale-105">
+                                {{ tag.name }}
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600">Solve more problems to discover your strengths!</p>
+            {% endif %}
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card-glass p-6 rounded-lg">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                📊 Recent Submissions
+            </h3>
+            {% if recent_submissions %}
+                <div class="space-y-3">
+                    {% for submission in recent_submissions %}
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 hover:shadow-md transition duration-300">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <a href="{% url 'Quest:problem_submit' submission.problem.id %}" class="text-lg font-medium text-gray-800 hover:text-blue-600 transition duration-300">
+                                    {{ submission.problem.title }}
+                                </a>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    Submitted on {{ submission.submitted_at|date:"M d, Y \a\t H:i" }}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <span class="difficulty-badge px-3 py-1 rounded-full text-xs font-medium
+                                    {% if submission.problem.difficulty == 1 %}bg-green-100 text-green-800{% elif submission.problem.difficulty == 2 %}bg-orange-100 text-orange-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {% if submission.problem.difficulty == 1 %}Easy{% elif submission.problem.difficulty == 2 %}Medium{% else %}Hard{% endif %}
+                                </span>
+                                <span class="px-3 py-1 text-xs font-medium rounded-full {% if submission.correct %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {% if submission.correct %}✓ Accepted{% else %}✗ Wrong Answer{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="text-4xl mb-4">📝</div>
+                    <p class="text-gray-600">No submissions yet. Start solving problems to see your activity here!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

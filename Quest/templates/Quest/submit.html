@@ -1,0 +1,396 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Solve {{ problem.title }} - CodeQuest</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .navbar-gradient {
+            background: linear-gradient(135deg, #4338ca 0%, #1e40af 50%, #0f766e 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-gradient p-4 text-white shadow-lg mb-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold flex items-center">
+                <span class="bg-white text-blue-600 px-3 py-1 rounded-lg mr-2 text-lg">🏆</span>
+                CodeQuest
+            </a>
+            <a href="{% url 'Quest:home' %}" class="px-4 py-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition duration-300">
+                ← Back to Problems
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4">
+        <div class="card-glass p-8 rounded-lg shadow-lg">
+            <!-- Problem Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold mb-4 text-gray-800">{{ problem.title }}</h1>
+                <div class="flex justify-center items-center space-x-4 mb-4">
+                    <span class="difficulty-badge px-4 py-2 rounded-full text-sm font-semibold
+                        {% if problem.difficulty == 1 %}bg-green-100 text-green-800{% elif problem.difficulty == 2 %}bg-orange-100 text-orange-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {% if problem.difficulty == 1 %}🟢 Easy{% elif problem.difficulty == 2 %}🟠 Medium{% else %}🔴 Hard{% endif %}
+                    </span>
+                    <span class="text-gray-600">Problem #{{ problem.id }}</span>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-gray-100 rounded-lg p-1 flex space-x-1">
+                    <button id="problem-btn" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white rounded-lg shadow-md transition duration-300 transform hover:scale-105">
+                        📝 Problem
+                    </button>
+                    <button id="editorial-btn" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300">
+                        💡 Editorial
+                    </button>
+                    <button id="submissions-btn" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300">
+                        📊 Submissions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Problem Content -->
+            <div id="problem-content">
+                <!-- Problem Description -->
+                <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">📋 Problem Description</h3>
+                    <p class="text-gray-700 leading-relaxed">{{ problem.description }}</p>
+                </div>
+
+                <!-- Test Cases -->
+                <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">🧪 Test Cases</h3>
+                    <div class="space-y-4">
+                        {% for testcase in problem.testcases.all %}
+                            <div class="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <strong class="text-gray-800">Input:</strong>
+                                        <code class="block bg-gray-100 p-2 rounded mt-1 text-sm">{{ testcase.input_data_to_display }}</code>
+                                    </div>
+                                    <div>
+                                        <strong class="text-gray-800">Expected Output:</strong>
+                                        <code class="block bg-gray-100 p-2 rounded mt-1 text-sm">{{ testcase.expected_output_data }}</code>
+                                    </div>
+                                </div>
+                                {% if testcase.explanation %}
+                                <div class="mt-3">
+                                    <strong class="text-gray-800">Explanation:</strong>
+                                    <p class="text-gray-600 text-sm mt-1">{{ testcase.explanation }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">🏷️ Tags</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in problem.tags.all %}
+                            <a href="{% url 'Quest:problems_by_tag' tag.id %}">
+                                <span class="bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm font-medium px-4 py-2 rounded-full transition duration-300 transform hover:scale-105">
+                                    {{ tag.name }}
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Code Editor -->
+                <div class="bg-white rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">💻 Your Solution</h3>
+                    <form id="solution-form" class="w-full">
+                        <textarea id="solution-code" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition duration-300" rows="15" placeholder="Write your solution here...">class Solution:
+    def {{ problem.function_name }}(self, {{ problem.function_args }}):
+        # Your code here
+        pass</textarea>
+                        <button type="submit" class="w-full mt-4 py-4 px-6 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-lg hover:from-green-600 hover:to-teal-600 font-semibold text-lg transition duration-300 transform hover:scale-105 shadow-lg">
+                            🚀 Submit Solution
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="result" class="mt-6"></div>
+            <div id="additional-info" class="mt-6 hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Editorial content for JavaScript access
+        const editorialContent = `{{ problem.editorial|escapejs }}`;
+        
+        var editor = CodeMirror.fromTextArea(document.getElementById('solution-code'), {
+            lineNumbers: true,
+            mode: 'python',
+            theme: 'monokai',
+            tabSize: 4,
+            indentUnit: 4,
+            lineWrapping: true,
+            scrollbarStyle: "native",
+        });
+
+        document.getElementById('solution-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const solutionCode = editor.getValue();
+            fetch('/api/problems/{{ problem.id }}/submit_solution/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({ solution: solutionCode }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Error fetching results');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.length > 0) {
+                    let resultHTML = '<h3 class="text-lg font-bold mb-2">Test Case Results:</h3>';
+
+                    const allCorrect = data.pop();
+                    if (allCorrect["all_correct"] === true) {
+                        resultHTML += `<h3 class="font-bold" style="color: green;">Accepted</h3>`;
+                    } else {
+                        resultHTML += `<h3 class="font-bold" style="color: red;">Wrong Answer</h3>`;
+                    }
+                    
+                    if (data[0].hasOwnProperty("error")) {                        
+                        if (data[0].judge0_response) {
+                            const judgeResponse = data[0].judge0_response;
+                            
+                            switch (judgeResponse.status.id) {
+                                case 5:
+                                    resultHTML += `<p class="font-bold text-red-500">Reason: Time Limit Exceeded</p>`;
+                                    break;
+                                case 7:
+                                    resultHTML += `<p class="font-bold text-red-500">Reason: Runtime Error</p><p>Details: ${judgeResponse.stderr}</p>`;
+                                    break;
+                                case 6:
+                                    resultHTML += `<p class="font-bold text-red-500">Reason: Compilation Error</p><p>Details: ${judgeResponse.compile_output}</p>`;
+                                    break;
+                                case 4:
+                                    resultHTML += `<p class="font-bold text-red-500">Reason: Memory Limit Exceeded</p>`;
+                                    break;
+                                default:
+                                    resultHTML += `<p class="font-bold text-red-500">Reason: Unknown error, recheck your code</p>`;
+                                    break;
+                            }
+                        } else {
+                            resultHTML += `<p class="text-red-500">No additional error details available.</p>`;
+                        }
+
+                        resultDiv.innerHTML = resultHTML;
+                    } else {
+                        resultHTML += `<ul>`;
+                        data.forEach((result) => {
+                            if (result.judge0_response) {
+                                const statusId = result.judge0_response.status.id;
+                                const resultColor = result.correct ? 'text-green-500' : 'text-red-500';
+
+                                switch (statusId) {
+                                    case 5:
+                                        resultHTML += `<li class="mb-4 text-red-500"><strong>Input:</strong> ${JSON.stringify(result.input)}<br><strong>Expected Output:</strong> ${result.expected_output}<br><strong>Actual Output:</strong> Time Limit Exceeded<br></li>`;
+                                        break;
+                                    case 7:
+                                        resultHTML += `<li class="mb-4 text-red-500"><strong>Input:</strong> ${JSON.stringify(result.input)}<br><strong>Expected Output:</strong> ${result.expected_output}<br><strong>Actual Output:</strong> Runtime Error: ${result.judge0_response.stderr}<br></li>`;
+                                        break;
+                                    case 6:
+                                        resultHTML += `<li class="mb-4 text-red-500"><strong>Input:</strong> ${JSON.stringify(result.input)}<br><strong>Expected Output:</strong> ${result.expected_output}<br><strong>Actual Output:</strong> Compilation Error: ${result.judge0_response.compile_output}<br></li>`;
+                                        break;
+                                    case 4:
+                                        resultHTML += `<li class="mb-4 text-red-500"><strong>Input:</strong> ${JSON.stringify(result.input)}<br><strong>Expected Output:</strong> ${result.expected_output}<br><strong>Actual Output:</strong> Memory Limit Exceeded<br></li>`;
+                                        break;
+                                    case 3:
+                                        resultHTML += `<li class="mb-4">
+                                            <strong>Input:</strong> ${result.input}<br>
+                                            <strong>Expected Output:</strong> ${result.expected_output}<br>
+                                            <strong>Actual Output:</strong> <span class="font-bold ${resultColor}">${result.actual_output}</span><br>
+                                        </li>`;
+                                        break;
+                                    default:
+                                        resultHTML += `<li class="mb-4"><strong>Input:</strong> ${JSON.stringify(result.input)}<br><strong>Expected Output:</strong> ${result.expected_output}<br><strong>Actual Output:</strong> Unknown status<br></li>`;
+                                        break;
+                                }
+                            }
+                        });
+
+                        resultHTML += '</ul>';
+                        resultDiv.innerHTML = resultHTML;
+                    }
+                    
+                } else {
+                    resultDiv.innerHTML = '<p>No test case results available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p>${error.message}</p>`;
+            });
+        });
+
+        // Tab functionality with improved styling
+        function switchTab(activeTab) {
+            const tabs = ['problem-btn', 'editorial-btn', 'submissions-btn'];
+            tabs.forEach(tab => {
+                const btn = document.getElementById(tab);
+                if (btn) {
+                    btn.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-teal-500', 'text-white', 'shadow-md', 'transform', 'scale-105');
+                    btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                }
+            });
+            
+            const activeBtn = document.getElementById(activeTab);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                activeBtn.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-teal-500', 'text-white', 'shadow-md', 'transform', 'scale-105');
+            }
+        }
+
+        // Initialize default tab
+        document.addEventListener('DOMContentLoaded', function() {
+            switchTab('problem-btn');
+        });
+
+        document.getElementById('editorial-btn').addEventListener('click', () => {
+            const problemContent = document.getElementById('problem-content');
+            const resultDiv = document.getElementById('result');
+            const additionalInfoDiv = document.getElementById('additional-info');
+
+            problemContent.classList.add('hidden');
+            resultDiv.classList.add('hidden');
+            switchTab('editorial-btn');
+
+            additionalInfoDiv.classList.remove('hidden');
+            additionalInfoDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                        💡 Editorial Solution
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <pre class="whitespace-pre-wrap text-sm text-gray-700">${editorialContent}</pre>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('submissions-btn').addEventListener('click', () => {
+            const problemContent = document.getElementById('problem-content');
+            const resultDiv = document.getElementById('result');
+            const additionalInfoDiv = document.getElementById('additional-info');
+
+            problemContent.classList.add('hidden');
+            resultDiv.classList.add('hidden');
+            switchTab('submissions-btn');
+
+            additionalInfoDiv.classList.remove('hidden');
+            additionalInfoDiv.innerHTML = `
+                <div class="bg-white rounded-lg p-6 border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                        📊 Your Previous Submissions
+                        <div class="loading-spinner ml-3"></div>
+                    </h3>
+                    <div id="submissions-content">Loading...</div>
+                </div>
+            `;
+
+            fetch('{% url "api:problem-submissions" problem.id request.user.id %}')
+            .then(response => response.json())
+            .then(data => {
+                let submissionsHTML = '';
+                if (data.length === 0) {
+                    submissionsHTML = `
+                        <div class="text-center py-8">
+                            <div class="text-4xl mb-4">📝</div>
+                            <p class="text-gray-600">No submissions yet for this problem.</p>
+                        </div>
+                    `;
+                } else {
+                    submissionsHTML = '<div class="space-y-4">';
+                    data.forEach((submission, index) => {
+                        const status = submission.correct ? "✓ Accepted" : "✗ Wrong Answer";
+                        const statusClass = submission.correct ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+                        submissionsHTML += `
+                            <div class="bg-gray-50 rounded-lg p-4 border-l-4 ${submission.correct ? 'border-green-500' : 'border-red-500'}">
+                                <div class="flex justify-between items-start mb-3">
+                                    <span class="text-sm font-semibold text-gray-700">Submission #${data.length - index}</span>
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${statusClass}">${status}</span>
+                                </div>
+                                <div class="mb-3">
+                                    <strong class="text-gray-800">Code:</strong>
+                                    <pre class="bg-gray-100 p-3 rounded mt-2 text-sm overflow-x-auto"><code>${submission.code}</code></pre>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <strong>Submitted:</strong> ${formatDateString(submission.submitted_at)}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    submissionsHTML += '</div>';
+                }
+                document.getElementById('submissions-content').innerHTML = submissionsHTML;
+            })
+            .catch(error => {
+                document.getElementById('submissions-content').innerHTML = `
+                    <div class="text-center py-8 text-red-600">
+                        <div class="text-4xl mb-4">⚠️</div>
+                        <p>Error loading submissions. Please try again.</p>
+                    </div>
+                `;
+            });
+        });
+        
+        document.getElementById('problem-btn').addEventListener('click', () => {
+            const problemContent = document.getElementById('problem-content');
+            const resultDiv = document.getElementById('result');
+            const additionalInfoDiv = document.getElementById('additional-info');
+
+            problemContent.classList.remove('hidden');
+            resultDiv.classList.remove('hidden');
+            additionalInfoDiv.classList.add('hidden');
+            switchTab('problem-btn');
+        });
+
+        function formatDateString(dateString) {
+            let date = new Date(dateString);
+
+            let day = ("0" + date.getDate()).slice(-2); 
+            let month = ("0" + (date.getMonth() + 1)).slice(-2);
+            let year = date.getFullYear();
+            let hours = ("0" + date.getHours()).slice(-2);
+            let minutes = ("0" + date.getMinutes()).slice(-2);
+            let seconds = ("0" + date.getSeconds()).slice(-2);
+
+            return `${day}-${month}-${year} @ ${hours}:${minutes}:${seconds}`;
+        }
+
+    </script>
+
+</body>
+</html>
