@@ -69,8 +69,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/codequest.git
-   cd codequest
+   git clone https://github.com/srikaran3004/Code-Quest.git
+   cd Code-Quest
    ```
 
 2. **Create and activate virtual environment**
@@ -184,26 +184,9 @@ CodeQuest/
 - **🔍 Better Search**: Enhanced filtering with visual indicators
 - **📈 Progress Visualization**: Beautiful progress bars and statistics
 
-## 🌟 Screenshots
-
-### Dashboard
-
-![Dashboard](screenshots/dashboard.png)
-_Modern problem browser with filtering and search capabilities_
-
-### Code Editor
-
-![Code Editor](screenshots/editor.png)  
-_Professional coding environment with syntax highlighting_
-
-### Profile Page
-
-![Profile](screenshots/profile.png)
-_Comprehensive progress tracking and statistics_
-
 ## 🤝 Contributing
 
-We welcome contributions from the community! Here's how you can help:
+I welcome contributions from the community! Here's how you can help:
 
 ### Development Setup
 
@@ -299,21 +282,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **CodeMirror**: For the professional code editor
 - **Community Contributors**: For their valuable feedback and contributions
 
-## 👥 Team
-
-- **Project Lead**: [Your Name](https://github.com/yourusername)
-- **UI/UX Designer**: Gradient Theme & Glass-morphism Implementation
-- **Backend Developer**: Django & API Development
-- **Frontend Developer**: Interactive JavaScript & Responsive Design
-
----
-
 <div align="center">
 
 **🚀 Ready to start your coding journey?**
 
-[**Launch CodeQuest**](http://127.0.0.1:8000) | [**Report Bug**](https://github.com/yourusername/codequest/issues) | [**Request Feature**](https://github.com/yourusername/codequest/issues)
+[**Launch CodeQuest**](http://127.0.0.1:8000) | [**Report Bug**](https://github.com/yourusername/Code-Quest/issues) | [**Request Feature**](https://github.com/srikaran3004/Code-Quest/issues)
 
-Made with ❤️ by the CodeQuest Team
+Made with ❤️ by the Srikaran
 
 </div>
